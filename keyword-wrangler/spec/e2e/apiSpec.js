@@ -1,6 +1,10 @@
 'use strict';
 
 var request = require('request');
+var dbSession = require('../../src/backend/dbSession.js');
+var resetDatabase = require('../resetDatabase.js');
+var async = require('async');
+
 
 describe('The API', function() {
 	
@@ -14,19 +18,66 @@ describe('The API', function() {
            {'id': 3, 'value': 'Knife', 'category': 2}
 
        	]
+       };
+
+    async.series(
+    	[
+
+          function(callback) {
+          	resetDatabase(dbSession, callback);
+          },
+
+          function(callback) {
+          	dbsession.insert(
+          		'keyword',
+          		{'value': 'Aubergine', 'categoryID': 1},
+          		function(err) {callback(err) });
+          },
+
+           function(callback) {
+          	dbsession.insert(
+          		'keyword',
+          		{'value': 'knife', 'categoryID': 2},
+          		function(err) {callback(err) });
+          },
+
+           function(callback) {
+          	dbsession.insert(
+          		'keyword',
+          		{'value': 'Onion', 'categoryID': 1},
+          		function(err) {callback(err) });
+          }
+
+       ],
+
+       function(err, results) {
+       	request.get(
+       	{
+       		'url': 'http://localhost:8080/api/keywords/',
+       		'json': true
+       	},
+       	function (err, res, body) {
+       		expect(res.statusCode).toBe(200);
+       		expect(body).toEqual(expected);
+       		done();
+       	 }
+       	 );
        }
 
+      );
+       	});
+       });
 
 
-	   request.get(
-	   	{
-	   	  'url': 'http://localhost:8080/api/keywords/', 
-	   	  'json': true
-	   	},
-	   	function (err, res, body) {
-	   		expect(res.statusCode).toBe(200);
-	   		expect(body.foo).toEqual(expected);
-	   		done();
-	   	});
-	});
-});
+
+
+
+
+
+
+
+
+   
+
+
+
